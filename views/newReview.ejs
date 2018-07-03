@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Add Review</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/show.css">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/newReview.css">
+</head>
+<body>
+	<div class="container">
+		<h1>Add new review for <%=bookName%></h1>
+		<form action="/reviews/<%=id%>" method="POST">
+			<p>Rate the book out of 5 :</p>
+			<div class="form-group">
+				<div class="form-check form-check-inline">
+		  			<input class="form-check-input" type="radio" name="rating" id="rating1" value="1">
+		  			<label class="form-check-label" for="rating1">1</label>
+				</div>
+				<div class="form-check form-check-inline">
+		  			<input class="form-check-input" type="radio" name="rating" id="rating2" value="2">
+		  			<label class="form-check-label" for="rating2">2</label>
+				</div>
+				<div class="form-check form-check-inline">
+		  			<input class="form-check-input" type="radio" name="rating" id="rating3" value="3">
+		  			<label class="form-check-label" for="rating3">3</label>
+				</div>
+				<div class="form-check form-check-inline">
+		  			<input class="form-check-input" type="radio" name="rating" id="rating4" value="4">
+		  			<label class="form-check-label" for="rating4">4</label>
+				</div>
+				<div class="form-check form-check-inline">
+		  			<input class="form-check-input" type="radio" name="rating" id="rating5" value="5" checked="true">
+		  			<label class="form-check-label" for="rating5">5</label>
+				</div>
+				<p>Write a review :</p>
+				<div class="form-group">
+				<textarea id="content" name="content" rows="4" class="form-control">
+					
+				</textarea></div>
+				<input type="text" name="bookName" value="<%=bookName%>" style='display: none;'>
+				<button id="submitBtn" class="btn btn-primary">Submit review</button>
+			</div>
+		</form>
+	</div>
+</body>
+</html>

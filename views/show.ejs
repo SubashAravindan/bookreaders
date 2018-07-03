@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title><%=volume.volumeInfo.title%></title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/show.css">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+</head>
+<body>
+	<% include partials/nav%>
+	<div class="container">
+		<div class="jumbotron text-center">
+			<div class="container">
+				<div class="thumbnail">
+					<img src="<%=volume.volumeInfo.imageLinks.thumbnail%>" alt="image not found">
+				</div>
+				<h1><%=volume.volumeInfo.title %></h1>
+				<h3><strong>Author :</strong> <%=volume.volumeInfo.authors[0]%></h3>
+				<div class="optionsDiv">
+					<button id="libBtn" class="btn btn-primary m-1"></button>
+					<button id="favBtn" class="btn btn-primary m-1"></button>
+					<a href="/reviews/<%=volume.id%>/new" class="btn btn-danger m-1">Rate/review this book</a>
+				</div>
+				<div class="dropdown m-1" id="readStatusDD">
+				  	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    Choose reading status
+				  	</button>
+				  	<div class="dropdown-menu" aria-labelledby="dropDown">
+				    	<button class="dropdown-item" type="button" value="1">Finished reading</button>
+				    	<button class="dropdown-item" type="button" value="2">Currently Reading</button>
+				    	<button class="dropdown-item" type="button" value="3">Want to read</button>
+				  	</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+
+	<div class="container bookDetails">
+		<div>
+			<% if((volume.volumeInfo.publisher)){%>
+			<p><span class="strong">Publisher : </span><%=volume.volumeInfo.publisher%></p>
+			<%}%>
+			<%if(volume.volumeInfo.description) {%>
+			<p><span class="strong">Description :</span><%-volume.volumeInfo.description%></p>
+			<%}%>
+			<%if(volume.volumeInfo.publishedDate) {%>
+			<p><span class="strong">Published : </span><%=volume.volumeInfo.publishedDate%></p>
+			<%}%>
+		</div>
+	</div>
+
+	<div class="container reviewsDiv">
+		<h1 class="display-4">Reviews</h1>
+		<strong><hr></strong>
+		<% reviews.forEach(review=>{ %>
+		<div>
+			<h2><%=review.username%></h2>
+			<strong>Rating : </strong><%=review.rating%>/5
+			<p><%=review.content%></p>
+			<strong><hr></strong>
+		</div>
+		<% }) %>
+	</div>
+
+	<script type="text/javascript">
+		if (<%=isLibrary%>) {
+			$("#libBtn").text("Remove from library")
+		}else{
+			$("#libBtn").text("Add to library");
+		}
+		if (<%=isfavourite%>) {
+			$("#favBtn").text("Remove from favourites")
+		}else{
+			$("#favBtn").text("Mark as favourite");
+		}
+
+		readStatus= <%=readStatus%>;
+		if (readStatus) {
+			$($("#readStatusDD .dropdown-item")[Number(readStatus)-1]).addClass("active");
+		}
+
+		$("#libBtn").click(()=>{
+			if ($("#libBtn").text()==="Add to library") {
+				$.post("/usercollections/mylibrary",{id:"<%=volume.id%>",bookName:'<%=volume.volumeInfo.title%>'},(data,response,xhr)=>{
+					if (xhr.status===200) {
+						$("#libBtn").text("Remove from library");
+					}
+				})				
+			} else {
+				$.ajax("/usercollections/mylibrary",{
+					method:"DELETE",
+					data:{
+						id:"<%=volume.id%>"
+					},
+					success:function(){
+					$("#libBtn").text("Add to library")
+					}
+				})
+			}
+
+		})
+		$("#favBtn").click(()=>{
+			if ($("#favBtn").text()==="Mark as favourite") {
+				$.post("/usercollections/favourites",{id:"<%=volume.id%>",bookName:'<%=volume.volumeInfo.title%>'},(data,response,xhr)=>{
+					if (xhr.status===200) {
+						$("#favBtn").text("Remove from favourites");
+					}
+				})				
+			} else {
+				$.ajax("/usercollections/favourites",{
+					method:"DELETE",
+					data:{
+						id:"<%=volume.id%>",
+						bookName:'<%=volume.volumeInfo.title%>'
+					},
+					success:function(){
+					$("#favBtn").text("Mark as favourite")
+					}
+				})
+			}
+
+		})
+
+		$("#readStatusDD .dropdown-item").click(function(){
+			$this=$(this)
+			$.post("/readstatus",{id:"<%=volume.id%>",bookName:'<%=volume.volumeInfo.title%>',status:$this.val()},(data,response,xhr)=>{
+				if (xhr.status===200) {
+					$("#readStatusDD .dropdown-item").removeClass("active")
+					$this.addClass("active");
+				}
+			})
+		})
+
+
+	</script>
+
+
+</body>
+</html>

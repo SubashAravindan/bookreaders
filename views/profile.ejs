@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>User Profile</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/show.css">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/profile.css">
+	<meta property="og:url"                content="http://localhost:3000"/>
+<meta property="og:type"               content="article" />
+<meta property="og:title"              content="BookReaders" />
+<meta property="og:description"        content="A platform for book lovers"/>
+<meta property="og:image"              content="" />
+
+</head>
+<body>
+
+
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId            : '1902410556489022',
+      autoLogAppEvents : true,
+      xfbml            : true,
+      version          : 'v3.0'
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "https://connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
+
+	<%include partials/nav %>
+	<span id="userSpan"><%=user%></span>
+	<%user=JSON.parse(user)%>
+
+	<div class="container">
+		<h1 class="text-center display-1 m-5"><%=user.username%>'s profile</h1>
+	</div>
+	<% if(currentUser.id===user._id){ %>
+		<p>Activity privacy : </p>
+		Public : <input type="radio" name="privacy" id="publicRadio">
+		Private : <input type="radio" name="privacy" id="privateRadio">
+	<% } %>
+
+	<div class="container" id="mylibraryDiv">
+		<h2 class="text-center">Books in library:</h2>
+		<hr>
+		<div class="row d-flex align-items-stretch ">
+		</div>
+	</div>
+	<div class="container" id="favDiv">
+		<h2 class="text-center">Favourite books:</h2>
+		<hr>
+		<div class="row d-flex align-items-stretch ">
+		</div>
+	</div>
+	<div class="container" id="currentReadDiv">
+		<h2 class="text-center">Currently Reading:</h2>
+		<hr>
+		<div class="row d-flex align-items-stretch ">
+		</div>
+	</div>
+	<div class="container" id="activityDiv">
+		<h2 class="text-center">User activity</h2>
+		<hr>
+		<% if(user.activityPrivacy=="private"&&user._id!=currentUser.id){ %>
+			<h2>User's activity is private</h2>
+		<% }else{ %>
+			<% activity.forEach(item=>{ %>
+				<% actionString=undefined %>
+				<% actionString=item.giveString() %>
+
+				<div>
+					<p><%=user.username%><%=actionString%>  <strong><%=item.bookName%></strong></p>
+				</div>
+
+  <button onclick="FB.ui({
+  method: 'feed',
+  link: 'https://github.com/SubashAravindan/bookreaders',
+  quote: '<%=user.username%><%=actionString%>  <%=item.bookName%>',
+
+}, function(response){});">Share activity to facebook</button>
+				<hr>
+			<% })	 %>
+		<% } %>
+	</div>
+
+
+
+	<script type="text/javascript">
+		user=JSON.parse($("#userSpan").text())
+		function getBookData(id) {
+			$.get("https://www.googleapis.com/books/v1/volumes/"+id,(data,response,xhr)=>{
+				return data;
+			})
+		}
+
+		function makeHTML(item){
+			htmlString='';
+			htmlString='<div class=" col-md-3 col-sm-6">';
+			htmlString+='<div class="card bookDiv">';
+			if (item.volumeInfo.imageLinks) {
+				thumbnail=item.volumeInfo.imageLinks.thumbnail;
+			} else {
+				thumbnail="";
+			}			
+			htmlString+='<img class="card-img-top" src="'+thumbnail+'" alt="Book thumbnail">';
+			htmlString+='<div class="card-body">';
+			htmlString+='<h5 class="card-title">'+item.volumeInfo.title+'</h5>';
+			htmlString+='<a href="/books/'+item.id+'" class="btn btn-primary">Go somewhere</a>';
+			htmlString+='</div></div></div>';
+			return htmlString;
+
+		}
+		user.mylibrary.forEach(item=>{
+			$.get("https://www.googleapis.com/books/v1/volumes/"+item,(data,response,xhr)=>{
+				$("#mylibraryDiv .row").append(makeHTML(data));
+			})
+		})
+		user.favourites.forEach(item=>{
+			$.get("https://www.googleapis.com/books/v1/volumes/"+item,(data,response,xhr)=>{
+				$("#favDiv .row").append(makeHTML(data));
+			})
+		})
+		user.readStatus.forEach(item=>{
+			if (item.status=='2') {
+				$.get("https://www.googleapis.com/books/v1/volumes/"+item.bookId,(data,response,xhr)=>{
+					$("#currentReadDiv .row").append(makeHTML(data));
+				})
+			}
+		})
+
+		$("#privateRadio").click(()=>{
+			$.get("/privacy/private",null)
+		})
+		$("#publicRadio").click(()=>{
+			$.get("/privacy/public",null)
+		})
+	</script>
+</body>
+</html>

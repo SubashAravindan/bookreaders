@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Home Page</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/home.css">
+</head>
+<body>
+	<%include partials/nav %>
+	<div class="container">
+		<div class="jumbotron">
+			<h1 class="display-2">Book manager app</h1>
+		</div>
+	</div>
+
+	<div class="container" id="searchDiv">
+		<h1 class="text-center display-4">Search for books</h1>
+<!-- 		<form> -->
+
+			 <div class="form-group text-center">
+    			<label for="searchBy">Search by :</label>
+    			<select class="form-control" id="searchBy" name="searchBy">
+      				<option value="1">Title</option>
+      				<option value="2">Author</option>
+      				<option value="3">Publisher</option>
+      				<option value="4">ISBN</option>
+      				<option value="5">Subject</option>
+    			</select>
+  			</div>
+ 			<div class="form-group">
+				<input type="text" id="searchName" name="searchTerm" placeholder="Search term" class="form-control form-control-lg">
+			</div>
+			<div class="form-group text-center">
+				<button class="btn btn-primary" id="searchBtn">Search</button>
+			</div>
+<!-- 		</form> -->
+	</div>
+
+	<div class="container" id="resultsDiv">
+		<hr>
+	</div>
+
+	<div class="container" id="sampleDiv">
+		<h2 class="text-center">Recommended books from genre: Adventure</h2>
+		<div class="row d-flex align-items-stretch ">
+			<% items.forEach(item=>{ %>
+				<div class=" col-md-3 col-sm-6">
+					<div class="card bookDiv">
+					  	<img class="card-img-top" src="<%=item.volumeInfo.imageLinks.thumbnail%>" alt="Book thumbnail">
+					  	<div class="card-body">
+					   	 	<h5 class="card-title"><%=item.volumeInfo.title%></h5>
+		<!-- 			    	<p class="card-text"><%=item.volumeInfo.subtitle%></p> -->
+					    	<a href="/books/<%=item.id%>" class="btn btn-primary">Go somewhere</a>
+					  </div>
+				</div>	
+				</div>		
+			<% }) %>
+		</div>
+	</div>
+
+	
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+
+	<script type="text/javascript">
+		$("#searchName").on("input",function(){
+			url="https://www.googleapis.com/books/v1/volumes?q=";
+			switch($("#searchBy").val()){
+				case "1": url+="intitle:";break;
+				case "2": url+="inauthor:";break;
+				case "3": url+="inpublisher:";break;
+				case "4": url+="isbn:";break;
+				case "5": url+="subject:";break;
+			}
+			url+=$("#searchName").val();
+			url+="&maxResults=40";
+			$.get(url,(data,response,xhr)=>{
+				if(xhr.status===200){
+					if (data.totalItems)
+						dispResults(data.items);
+				}
+			})
+		})
+		function dispResults(items){
+			str='<h1 class="text-center">Search Results</h1><div class="row d-flex align-items-stretch ">';
+			items.forEach(item=>{
+				str+=makeHTML(item);
+			})
+			str+='</div>';
+			$("#resultsDiv").html(str);
+		}
+		function makeHTML(item){
+			htmlString='';
+			htmlString='<div class=" col-md-3 col-sm-6">';
+			htmlString+='<div class="card bookDiv">';
+			if (item.volumeInfo.imageLinks) {
+				thumbnail=item.volumeInfo.imageLinks.thumbnail;
+			} else {
+				thumbnail="";
+			}			
+			htmlString+='<img class="card-img-top" src="'+thumbnail+'" alt="Book thumbnail">';
+			htmlString+='<div class="card-body">';
+			htmlString+='<h5 class="card-title">'+item.volumeInfo.title+'</h5>';
+			htmlString+='<a href="/books/'+item.id+'" class="btn btn-primary">Go somewhere</a>';
+			htmlString+='</div></div></div>';
+			return htmlString;
+
+		}
+	</script>	
+</body>
+</html>

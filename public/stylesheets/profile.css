@@ -1,0 +1,15 @@
+.bookDiv{
+	margin-bottom: 50px;	
+}
+
+#favDiv img,#currentReadDiv img,#mylibraryDiv img{
+	max-height: 20rem;
+}
+
+#userSpan{
+	display: none;
+}
+
+#activityDiv p{
+	font-size: 1.5em;
+}
